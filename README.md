@@ -1,3 +1,10 @@
+## Installation
+
+Run in the console:
+
+```
+composer require craftsnippets/craft-dpd-easyship
+```
 
 ## Allowed countries
 
@@ -9,7 +16,7 @@ Besides that, only sender and recipient addresses of parcels from Croatia and Sl
 
 In order to be able to use Easyship, control panel user must have "Manage DDP EasyShip parcels" permission enabled.
 
-# DPD EasyShip interface
+## DPD EasyShip interface
 Dpd Easyship can be only used in Croatia dn Slovenia.
 
 To use DPD Easyship, add ONE field of "Dpd EasyShip" type to order field layout. This field is used only as container for data and will not display any kind of input on order field layout.
