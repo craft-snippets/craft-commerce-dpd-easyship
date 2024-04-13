@@ -17,11 +17,11 @@ Besides that, only sender and recipient addresses of parcels from Croatia and Sl
 In order to be able to use Easyship, control panel user must have "Manage DDP EasyShip parcels" permission enabled.
 
 ## DPD EasyShip interface
-Dpd Easyship can be only used in Croatia dn Slovenia.
+Dpd Easyship can be only used in Croatia adn Slovenia.
 
 To use DPD Easyship, add ONE field of "Dpd EasyShip" type to order field layout. This field is used only as container for data and will not display any kind of input on order field layout.
 
-Then you need to enable Easyship for specific shipping methods in plugin settings in "Shipping methods with Dpd EasyShip integration enabled" setting. This will make Easyship interface appear in order page and element index actions available fpr specific orders on orders list/
+Then you need to enable Easyship for specific shipping methods in plugin settings in "Shipping methods with Dpd EasyShip integration enabled" setting. This will make Easyship interface appear in order page and element index actions available fpr specific orders on orders list.
 
 If order has parcels, but then admin removes its shipping method from plugin setting, interface will still show up to make it possible to remove parcels.
 
