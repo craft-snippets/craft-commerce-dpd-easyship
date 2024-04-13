@@ -1,0 +1,431 @@
+{% import '_includes/forms.twig' as forms %}
+
+<div class="easyship__container" data-dpd-interface>
+    <div class="easyship__header">
+        {{ 'DPD EasyShip' | t('dpd-easy-ship') }}
+    </div>
+
+    {% if not order.dpdEasyship.getCanUse() %}
+    <div class="easyship__disabled-info">
+        <span class="notification-icon easyship__disabled-info-icon" data-icon="alert" aria-label="error" role="img"></span>
+        <span>
+            {{ 'Please note that DPD EasyShip is disabled for the current shipping method of this order. You can still access DPD EasyShip functionality because this order already has parcels assigned.' | t('dpd-easy-ship') }}
+        </span>
+    </div>
+    {% endif %}
+
+    <div class="easyship__box-wrapper" data-dpd-interface-inside>
+        <div class="easyship__image">
+            {% include 'dpd-easy-ship/icon.svg' %}
+        </div>
+        <div class="easyship__box">
+
+            {# parcels exist #}
+            {% if order.dpdEasyship.getHasParcels() %}
+            <div class="easyship__ready">
+
+                <strong>{{ 'Parcels'|t('dpd-easy-ship') }} ({{ order.dpdEasyship.getCurrentParcelTypeLabel() }})</strong>:
+                {# list of parcels #}
+                <ul class="easyship__parcels">
+                {% for parcel in order.dpdEasyship.parcels %}
+                    <li>
+                        {% if parcel.getTrackingUrl() %}
+                            <a href="{{ parcel.getTrackingUrl() }}" target="_blank">{{ parcel.number }}</a>
+                        {% else %}
+                            {{ parcel.number }}
+                        {% endif %}
+                        {% if parcel.status %} - {{ 'status'|t('dpd-easy-ship') }}: <strong>{{ parcel.status }}</strong>{% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+                <hr>
+                {% if order.dpdEasyship.isCod() %}
+                    {{ 'Cash on delivery amount:'|t('dpd-easy-ship') }} <strong>{{ order.dpdEasyship.cod_amount }}</strong> {{ '(in the currency of the recipient country)'|t('dpd-easy-ship') }}
+                {% endif %}
+
+                <hr>
+
+                {# buttons #}
+                <a target="_blank" href="{{ pdfUrl }}" class="btn" data-dpd-label-trigger>
+                    {{ 'Get parcel labels'|t('dpd-easy-ship') }}
+                </a>
+                <button
+                    class="btn"
+                    data-dpd-toggle-details
+                    data-dpd-details-text-show="{{ 'Show details'|t('dpd-easy-ship') }}"
+                    data-dpd-details-text-hide="{{ 'Hide details'|t('dpd-easy-ship') }}"
+                >
+                    {{ 'Show details'|t('dpd-easy-ship') }}
+                </button>
+                <button class="btn" data-dpd-status>
+                    {{ 'Update parcels status'|t('dpd-easy-ship') }}
+                </button>
+                <button class="btn" data-dpd-remove {{ not order.dpdEasyship.canRemoveParcels ? 'data-dpd-cannot-remove' }}>
+                    {{ 'Remove parcels'|t('dpd-easy-ship') }}
+                </button>
+                <br>
+
+                <div data-dpd-details hidden>
+                    <br>
+                    <ul>
+                        {% for property in order.dpdEasyship.getJsonProperties() %}
+                            <li>
+                                {{ property.label }}:
+                                <strong>{{ order.dpdEasyship.getSavedProperty(property.value) }}</strong>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <hr>
+                <div>
+                    {{ 'Remember that editing order settings after parcels were already created, will not influence parcels settings.'|t('dpd-easy-ship') }}
+                </div>
+
+            </div>
+
+            {% endif %}
+
+            {# add parcels #}
+            {% if not order.dpdEasyship.parcels %}
+            <div class="" data-dpd-send hidden>
+
+                {{ 'Creating parcels of the type:'|t('dpd-easy-ship') }} <strong>{{ order.dpdEasyship.getDefaultParcelTyPeLabel() }}</strong>
+                <hr>
+
+                <div data-dpd-settings>
+                    {# dont add name attribute to avoid sending it with dfault order edit request #}
+                    {{ forms.textField({
+                        label: 'Number of parcels'|t('dpd-easy-ship'),
+                        value: 1,
+                        id: 'num_of_parcel',
+                    }) }}
+
+{#                    {{ forms.textField({#}
+{#                        label: 'Parcel weight (kg)'|t('dpd-easy-ship'),#}
+{#                        instructions: 'Mandatory for PUDO parcels. Default value is calculated from the products weight.'|t('dpd-easy-ship'),#}
+{#                        value: order.totalWeight,#}
+{#                        id: 'weight',#}
+{#                    }) }}#}
+
+                    {{ forms.selectField({
+                        label: 'Sender address'|t('dpd-easy-ship'),
+                        instructions: 'Select the location which address will be used as the sender address for the parcels.'|t('dpd-easy-ship'),
+                        id: 'senderLocationId',
+                        options: locationOptions,
+                        value: defaultLocationId,
+                    }) }}
+
+                    {{ forms.textareaField({
+                        label: 'Delivery instructions for courier'|t('dpd-easy-ship'),
+                        instructions: 'The default value is taken from the proper field assigned to order, if one was set in the plugin settings.'|t('dpd-easy-ship'),
+                        value: order.dpdEasyship.getDeliveryInstructions(),
+                        id: 'sender_remark',
+                    }) }}
+                </div>
+
+                <div class="field">
+                    <button class="btn" data-dpd-cancel>
+                        {{ 'Cancel'|t('dpd-easy-ship') }}
+                    </button>
+                    <button class="btn submit" data-dpd-submit>
+                        {{ 'Submit'|t('dpd-easy-ship') }}
+                    </button>
+                </div>
+
+            </div>
+
+            {# initial #}
+            <div class="easyship__initial" data-dpd-initial>
+
+                <button class="btn submit" data-dpd-show>
+                    {{ 'Create parcels'|t('dpd-easy-ship') }}
+                </button>
+
+            </div>
+
+            {% endif %}
+
+
+        </div>
+    </div>
+</div>
+
+<script>
+{% js %}
+// switch text on hide/show details button
+$('[data-dpd-toggle-details]').on('click', function(e){
+    e.preventDefault();
+    $('[data-dpd-details]').slideToggle();
+    if($(this).text().trim() == $(this).data('dpd-details-text-show')){
+        $(this).text($(this).data('dpd-details-text-hide'));
+    }else{
+        $(this).text($(this).data('dpd-details-text-show'));
+    }
+});
+
+// show create parcel form
+$('[data-dpd-show]').on('click', function(e){
+    e.preventDefault();
+    $('[data-dpd-initial]').hide();
+    $('[data-dpd-send]').show();
+});
+
+// hide create parcel form
+$('[data-dpd-cancel]').on('click', function(e){
+    e.preventDefault();
+    $('[data-dpd-initial]').show();
+    $('[data-dpd-send]').hide();
+});
+
+// update status
+$('[data-dpd-status]').on('click', function(e){
+    e.preventDefault();
+
+    let sendController = '{{actionUrl('dpd-easy-ship/api/update-parcels-status')}}';
+    let formData = new FormData();
+
+    formData.append('orderId', {{ order.id }});
+    formData.append('{{craft.app.config.general.csrfTokenName}}', '{{ craft.app.request.csrfToken }}');
+
+    const button = $(this);
+    $.ajax({
+        cache: false,
+        contentType: false,
+        processData: false,
+        method: "POST",
+        url: sendController,
+        data: formData,
+        dataType: "json",
+        beforeSend: function( ) {
+            button.addClass('btn-is-loading');
+        },
+    }).always(function() {
+
+    }).done(function( data ) {
+        if(data['success'] ?? false){
+            location.reload();
+        }else{
+            alert('DPD EasyShip error');
+            button.removeClass('btn-is-loading');
+        }
+    }).fail(function( data ) {
+        button.removeClass('btn-is-loading');
+        Craft.cp.displayError('Controller error');
+    });
+});
+
+
+// remove dpd data
+
+$('[data-dpd-remove]').on('click', function(e){
+    e.preventDefault();
+
+    if($(this).is('[data-dpd-cannot-remove]')){
+        Craft.cp.displayError('{{ 'Cannot remove parcels - only parcels with "CREATED" and "PRINTED" status can be removed.'|t('dpd-easy-ship')|raw  }}');
+        return;
+    }
+
+    if(!confirm('{{ 'Are you sure you want to remove the parcels from the Order?'|t('dpd-easy-ship') }}')){
+        return;
+    }
+
+    let sendController = '{{actionUrl('dpd-easy-ship/api/remove-parcels')}}';
+    let formData = new FormData();
+
+    formData.append('orderId', {{ order.id }});
+    formData.append('{{craft.app.config.general.csrfTokenName}}', '{{ craft.app.request.csrfToken }}');
+
+    const button = $(this);
+    $.ajax({
+        cache: false,
+        contentType: false,
+        processData: false,
+        method: "POST",
+        url: sendController,
+        data: formData,
+        dataType: "json",
+        beforeSend: function( ) {
+            button.addClass('btn-is-loading');
+            $('[data-dpd-interface]').addClass('dpd-interface-blocked');
+            {#$('[data-dpd-remove]').text('{{ 'Removing...'|t('dpd-easy-ship') }}');#}
+        },
+    }).always(function() {
+        $('[data-dpd-interface]').removeClass('dpd-interface-blocked');
+        button.removeClass('btn-is-loading');
+        {#$('[data-dpd-remove]').text('{{ 'Remove parcels'|t('dpd-easy-ship') }}');#}
+    }).done(function( data ) {
+        if(data['success'] ?? false){
+            location.reload();
+        }else{
+            Craft.cp.displayError(data['status']);
+        }
+    }).fail(function( data ) {
+        Craft.cp.displayError('Controller error');
+    });
+});
+
+// create parcels
+$('[data-dpd-submit]').on('click', function(e){
+    e.preventDefault();
+
+    let sendController = '{{actionUrl('dpd-easy-ship/api/create-parcel')}}';
+    let formData = new FormData();
+
+    formData.append('orderId', {{ order.id }});
+    formData.append('{{craft.app.config.general.csrfTokenName}}', '{{ craft.app.request.csrfToken }}');
+
+    let requestSettings = {};
+
+    $('[data-dpd-settings] input, [data-dpd-settings] textarea, [data-dpd-settings] select').each(function(){
+        let key = $(this).attr('id');
+        requestSettings[key] = $(this).val();
+    });
+    formData.append('requestSettings', JSON.stringify(requestSettings));
+
+    const button = $(this);
+    $.ajax({
+        cache: false,
+        contentType: false,
+        processData: false,
+        method: "POST",
+        url: sendController,
+        data: formData,
+        dataType: "json",
+        beforeSend: function( ) {
+            button.addClass('btn-is-loading');
+        },
+    }).always(function() {
+        button.removeClass('btn-is-loading');
+    }).done(function( data ) {
+        if(data['success'] ?? false){
+            {% if craft.app.getPlugins().getPlugin('dpd-easy-ship').getSettings().reloadOnRequest == true %}
+            location.reload();
+            {% endif %}
+        }else{
+            Craft.cp.displayError(data['error']);
+        }
+    }).fail(function( data ) {
+        Craft.cp.displayError('Controller error');
+    });
+
+});
+
+$('#order-edit-btn, #orderDetailsTab .btn-link-default').on('click', function(e){
+    $('[data-dpd-interface-inside]').addClass('easyship-blocked');
+});
+
+$('[data-dpd-interface]').on('click', function(e){
+    if($('[data-dpd-interface-inside]').hasClass('easyship-blocked')){
+        alert('{{ 'You need to finish editing the order, before using Ddp EasyShip.'|t('dpd-easy-ship')  }}');
+    }
+});
+
+{% endjs %}
+</script>
+
+<style>
+{% css %}
+.easyship-blocked{
+    pointer-events: none;
+    opacity: 0.5;
+}
+.easyship__container{
+    margin-top: 3rem;
+}
+.easyship__header{
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+.easyship__box{
+
+}
+
+.easyship__box-wrapper{
+    display: flex;
+    gap: 1rem;
+    background-color: #f3f7fc;
+    /*border: 1px solid #eee;*/
+    border-radius: 5px;
+    box-shadow: 0 0 0 1px #cdd8e4,0 2px 12px rgba(205,216,228,.5);
+    padding: 1rem;
+}
+.easyship__image svg{
+    width: 3.5rem;
+    height: auto;
+}
+.easyship__box{
+    flex-grow: 1;
+}
+.easyship__parcels{
+    list-style: square;
+    margin-left: 1rem;
+    margin-top: 0.7rem;
+}
+.easyship__initial{
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+.easyship__disabled-info{
+    background-color: var(--gray-050);
+    border-radius: var(--large-border-radius);
+    box-shadow: 0 0 0 1px #cdd8e4,0 2px 12px rgba(205,216,228,.5);
+    box-sizing: border-box;
+    margin-bottom: var(--l);
+    padding: var(--l) var(--xl) var(--xl);
+    display: flex;
+    gap: 0.5rem;
+}
+
+.easyship__disabled-info .easyship__disabled-info-icon{
+    color: var(--error-color);
+}
+[data-dpd-cannot-remove]{
+    opacity: 0.25;
+}
+.dpd-interface-blocked{
+    pointer-events: none;
+}
+
+
+.btn-is-loading:after {
+    position: absolute;
+    display: block;
+    height: 1rem;
+    width: 1rem;
+    margin-top: -.5rem;
+    margin-left: -.5rem;
+    border: 2px solid;
+    border-radius: 50%;
+    animation: btn-loading .5s infinite linear;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    content: "";
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+}
+.btn-is-loading.submit:after{
+    border-top-color: white;
+    border-left-color: white;
+}
+.btn-is-loading:not(.submit):after{
+    border-top-color: black;
+    border-left-color: black;
+}
+@keyframes btn-loading {
+    0% {
+        transform:rotate(0)
+    }
+    to {
+        transform:rotate(360deg)
+    }
+}
+.btn-is-loading, .btn-is-loading.submit {
+    position:relative;
+    pointer-events:none;
+    color:transparent !important;
+}
+{% endcss %}
+</style>

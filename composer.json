@@ -1,0 +1,33 @@
+{
+    "name": "craftsnippets/craft-dpd-easyship",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "require": {
+        "php": ">=8.0.2",
+        "craftcms/cms": "^5.0.0",
+        "datalinx/dpd-php-sdk": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "craftsnippets\\dpdeasyship\\": "src/"
+        }
+    },
+    "extra": {
+        "handle": "dpd-easy-ship",
+        "name": "DPD EasyShip",
+        "developer": "Piotr Pogorzelski",
+        "documentationUrl": "",
+        "class": "craftsnippets\\dpdeasyship\\DpdEasyShip"
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.0.2"
+        },
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "craftcms/plugin-installer": true
+        }
+    }
+}
+

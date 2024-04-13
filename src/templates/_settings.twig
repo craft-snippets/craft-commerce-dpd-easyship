@@ -1,0 +1,105 @@
+{# @var plugin \craftsnippets\dpdeasyship\DpdEasyShip #}
+{# @var settings \craftsnippets\dpdeasyship\models\Settings #}
+
+{% import '_includes/forms.twig' as forms %}
+
+
+{{ forms.textField({
+    label: 'API Login'|t('dpd-easy-ship'),
+    name: 'apiLogin',
+    value: settings.apiLogin,
+    errors: settings.getErrors('apiLogin'),
+}) }}
+
+{{ forms.textField({
+    label: 'API Password'|t('dpd-easy-ship'),
+    name: 'apiPassword',
+    value: settings.apiPassword,
+    errors: settings.getErrors('apiPassword'),
+}) }}
+
+{{ forms.selectField({
+    label: 'API Country'|t('dpd-easy-ship'),
+    name: 'apiCountry',
+    value: settings.apiCountry,
+    errors: settings.getErrors('apiCountry'),
+    options: settings.getCountryOptions(),
+}) }}
+
+{# phone number field #}
+{{ forms.selectField({
+   label: "Phone number field"|t('dpd-easy-ship'),
+   instructions: "Select one of the plain text fields assigned to the address model. Value of this field will be used for the parcels generation request."|t('dpd-easy-ship'),
+   name: 'phoneFieldId',
+   options: settings.getPhoneFieldOptions(),
+   value: settings.phoneFieldId,
+   errors: settings.getErrors('phoneFieldId'),
+}) }}
+
+{# delivery instructions field #}
+{{ forms.selectField({
+    label: "Delivery instructions for courier field"|t('dpd-easy-ship'),
+    instructions: "Optional. One of the plain text fields assigned to the Order model. Value of this field will be used for the parcels generation request."|t('dpd-easy-ship'),
+    name: 'instructionsFieldId',
+    options: settings.getDeliveryInstructionsFieldOptions(),
+    value: settings.instructionsFieldId,
+    errors: settings.getErrors('instructionsFieldId'),
+}) }}
+
+{#  shipping methods #}
+{{forms.editableTableField({
+   id: 'enabledShippingMethods',
+   name: 'enabledShippingMethods',
+   cols: settings.getShippingMethodsColumns(),
+   rows: settings.enabledShippingMethods,
+   addRowLabel: 'Add the shipping method'|t('search-toolbox'),
+   initJs: true,
+   label: 'Shipping methods with Dpd EasyShip integration enabled'|t('search-toolbox'),
+   errors: settings.getErrors('enabledShippingMethods'),
+   allowAdd: true,
+   allowDelete: true,
+   allowReorder: false,
+}) }}
+
+{# default cod type #}
+{{ forms.selectField({
+    label: "Cash On Delivery (COD) type"|t('dpd-easy-ship'),
+    instructions: "This setting is only used for the COD type parcels."|t('dpd-easy-ship'),
+    name: 'codType',
+    options: codTypeOptions,
+    value: settings.codType,
+    errors: settings.getErrors('codType'),
+}) }}
+
+
+{{ forms.selectField({
+    label: 'Order status that will be set when parcels status will be updated to "delivered" status.'|t('dpd-easy-ship'),
+    name: 'deliveredOrderStatusId',
+    value: settings.deliveredOrderStatusId,
+    errors: settings.getErrors('deliveredOrderStatusId'),
+    options: settings.getDeliveredOrderStatusIdOptions(),
+}) }}
+
+<hr>
+<h3>{{ 'Sender contact info on the label'|t('dpd-easy-ship') }}</h3>
+
+<div id="" class="readable" data-layout-element="cb551f9d-2812-4483-a209-a0815339b4f9">
+    <blockquote class="note tip">
+        <p>{{ 'Postal codes from Slovenia must be 4 digits long and postal codes from Croatia must be 5 digits long. Using different values will result in the DPD EasyShip API errors. This applies both to the sender address set in the plugin settings and the client shipping address set for the order.'|t('dpd-easy-ship') }}</p>
+    </blockquote>
+</div>
+<br>
+<div id="" class="readable" data-layout-element="cb551f9d-2812-4483-a209-a0815339b4f9">
+    <blockquote class="note tip">
+        <p>{{ 'Only Croatia and Slovenia are allowed in the client shipping address country field. Using other country values will result in the DPD EasyShip API errors. You can limit selectable countries in commerce store settings, under "Country List" field. You can also set default country for addresses using "defaultCountryCode" option in the  config.php settings file.'|t('dpd-easy-ship') }}</p>
+    </blockquote>
+</div>
+
+{{ forms.selectField({
+    label: 'Default sender address'|t('dpd-easy-ship'),
+    instructions: 'Select the location which address will be used as default sender address when creating parcels for orders. This setting can be overridden for the specific orders.'|t('dpd-easy-ship'),
+    name: 'defaultLocationId',
+    value: settings.defaultLocationId,
+    errors: settings.getErrors('defaultLocationId'),
+    options: settings.getLocationOptions(),
+}) }}

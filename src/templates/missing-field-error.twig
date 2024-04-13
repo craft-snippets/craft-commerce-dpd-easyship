@@ -1,0 +1,18 @@
+<br><br>
+
+<div class="readable">
+<blockquote class="note tip dpd-missing-field">
+    <p>{{ 'This order shipping method has DPD EasyShip enabled, but no DPD EasyShip field is assigned to order field layout.'|t('dpd-easy-ship') }}</p>
+</blockquote>
+</div>
+
+{% css %}
+.dpd-missing-field{
+    color: #cf1124 !important;;
+    border-color: #cf1124 !important;
+    padding-left: 1em !important;
+}
+.dpd-missing-field:before{
+    display: none !important;
+}
+{% endcss %}
