@@ -85,7 +85,9 @@ Delivery address is taken from shipping address set in the order.
 
 Sender address is optional. To use it, you need to create at least one inventory location in commerce/inventory/locations. In plugin settings then you can set it as default one which will be used when sending. This default selection can be later override in DPD interface on order page.
 
-Remember that address field layout **needs to have "Full name" native field assigned**. For both sender and delivery addresses, "Address Line 1" will be used for street and "Address Line 2" for house number.
+Remember that address field layout **needs to have "Full name" or "Organisation" native field assigned**. 
+
+For both sender and delivery addresses, "Address Line 1" will be used for street and "Address Line 2" for house number.
 
 For delivery address, if you enter "Organisation" and "Full name", organization is used for "Receiver company or personal name" and full name for "Receiver additional name". If you enter just full name, it will be used for "Receiver company or personal name".
 
